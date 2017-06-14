@@ -6,11 +6,13 @@ $view = false;
 if(isset($_GET['export'])){
 	$pdo = new PDO("$driver:host=$hostname;port=$port;dbname=$dbname", "$dbuser", "$dbpassword");
 	$pdo->setAttribute(PDO::ATTR_TIMEOUT, 360);
-	$statement = $pdo->prepare('SELECT * FROM adressen WHERE wz2003_1 LIKE :id OR wz2003_2 LIKE :id OR wz2003_3 LIKE :id');
-	$result = $statement->execute(array('id' => $ID));
-	$save = $statement->fetchAll();
+	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	//$statement = $pdo->prepare('SELECT * FROM adressen WHERE wz2003_1 LIKE :id OR wz2003_2 LIKE :id OR wz2003_3 LIKE :id');
+	//$result = $statement->execute(array("id" => $ID.'%'));
+	//$save = $statement->fetchAll();
 	//$saveset = array();
-	
+	$query = $pdo->query('SELECT * FROM adressen WHERE wz2003_1 LIKE :id OR wz2003_2 LIKE :id OR wz2003_3 LIKE :id');
+	$get = $query->fetchAll();
 	//while ($row = $statement->fetch(PDO::FETCH_ASSOC)){
 	//	array_push($saveset, array_values($row));
 	//}
@@ -45,7 +47,7 @@ if($view){
 	
 	echo '$row';
 	echo '<pre>';
-	print_r($save);
+	print_r($get);
 	echo '</pre>';
 }
 ?>
