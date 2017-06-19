@@ -20,7 +20,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
  * </p>
  * @return boolean
  */
-function QueryExport($search1, $search2, $search3, $searchName){
+function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	/*
 	 * Declaration Section
 	 */
@@ -48,14 +48,13 @@ function QueryExport($search1, $search2, $search3, $searchName){
 	$file = "Export_$searchName.csv";
 	$path = "export/";
 	$logpath = "export/log/";
-	$logfn = "log_Export_$searchName.log";
+	$logfn = "log_Export_".$searchName."_".$searchIndex.".log";
 	$export = fopen($path.$file, 'w');
 	$log = fopen($logpath.$logfn, 'w');
 	
 	foreach ($saveset as $entry){
 		fputcsv($export, $entry);
 		fwrite($log, print_r($entry, true));
-			
 		}
 	return true;
 }
