@@ -1,8 +1,5 @@
 <?php
 try {
-$db = new PDO('mysql:host=localhost;dbname=adressen', 'root', '');
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 //---------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -21,6 +18,8 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
  * @return boolean
  */
 function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
+	$db = new PDO('mysql:host=localhost;dbname=adressen', 'root', '');
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	/*
 	 * Declaration Section
 	 */
@@ -48,7 +47,7 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	$file = "Export_$searchName.csv";
 	$path = "export/";
 	$logpath = "export/log/";
-	$logfn = "log_Export_".$searchName."_".$searchIndex.".log";
+	$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1.".log";
 	$export = fopen($path.$file, 'w');
 	$log = fopen($logpath.$logfn, 'w');
 	
