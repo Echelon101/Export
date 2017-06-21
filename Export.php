@@ -53,7 +53,7 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	
 	foreach ($saveset as $entry){
 		fputcsv($export, $entry);
-		fwrite($log, print_r($entry, true));
+		//fwrite($log, print_r($entry, true));
 		}
 	return true;
 }
