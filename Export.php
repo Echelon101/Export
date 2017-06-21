@@ -57,6 +57,49 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 		}
 	return true;
 }
+function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
+	$dbcon = new PDO('mysql:host=localhost;dbname=adressen', 'root', '');
+	$bundsave = array();
+	$search1 = $search1."%";
+	$search2 = $search2."%";
+	$search3 = $search3."%";
+	$sql = '
+	SELECT *
+	FROM adressen
+	WHERE Bundesland = ? AMD (wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?)
+	';
+	if (strlen($search1)<=3 && strlen($search2) <=3 && strlen($search3) <= 3){
+		$bund = array("Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern", "Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen");
+		foreach ($bund as $index){
+			$getbund_statement = $dbcon->prepare($sql);
+			$getbund_result = $getbund_statement->execute(array("$index", "$search1", "$search2", "$search3"));
+			while ($getbund_fetch = $getbund_statement->fetch(PDO::FETCH_ASSOC)){
+				array_push($bundsave, array_values($getbund_fetch));
+			}
+			$file = "Export_".$searchName."_".$index.".csv";
+			$path = "exportbund/";
+			$logpath = "exportbund/log/";
+			$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1."_".$index.".log";
+			$export = fopen($path.$file, 'w');
+			$log = fopen($logpath.$logfn, 'w');
+			echo '<pre>';
+			var_dump($index);
+			echo '--------------------------------------------------------------------------------------------- <br>';
+			var_dump($getbund_fetch);
+			echo '--------------------------------------------------------------------------------------------- <br>';
+			var_dump($bundsave);
+			echo '--------------------------------------------------------------------------------------------- <br>';
+			echo '</pre>';
+			foreach ($bundsave as $exportentry){
+				fputcsv($export, $exportentry);
+				//fwrite($log, print_r($exportentry, true));
+			}
+		}
+		return true;
+	}else{
+		return false;
+	}
+}
 } catch (PDOException $e) {
 	echo "Error: " . $e->getMessage() . "<br>";
 	return false;
@@ -64,24 +107,3 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 }
 
 
-
-
-/*
-  $create = "CREATE TABLE `users` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `vorname` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `nachname` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`), UNIQUE (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-$db->query($create);
-*/
-
-?>
-<form action="?export=true" method="post">
-<button type="submit">export</button>
-</form>
