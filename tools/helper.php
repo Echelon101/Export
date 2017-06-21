@@ -8,11 +8,6 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	FROM adressen
 	WHERE Bundesland = ? AMD (wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?)
 	';
-	$search1 = "93%";
-	$search2 = "93%";
-	$search3 = "93%";
-	$searchIndex = "93%";
-	$searchName = "Serviceunternehmen";
 	if (strlen($search1)<=3 && strlen($search2) <=3 && strlen($search3) <= 3){
 		$bund = array("Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern", "Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen");
 		foreach ($bund as $index){
