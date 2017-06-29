@@ -6,7 +6,7 @@
 	<title>Exporter</title>
 </head>
 <body>
-	<a href="Pullinfo.php">AdressExport Deutschlandweit</a><br>
-	<a href="PullinfoBund.php">AdressExport geteilt in Bundesländern</a>
+	<a href="sites/komplett.php">AdressExport Deutschlandweit</a><br>
+	<a href="sites/filtered.php">AdressExport geteilt in Bundesländern</a>
 </body>
 </html>
