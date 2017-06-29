@@ -20,7 +20,6 @@ try {
 function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	try{
 	try{
-		echo 'call successful';
 	$db = new PDO('mysql:host=localhost;dbname=adressen', 'root', '');
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	/*
@@ -40,15 +39,11 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	WHERE wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?
 	';
 	
-	$saveset = array(
-			array('"ID"', '"Satznr"', '"Firmen_KZ"', '"Firma1"', '"Firma2"', '"Firma3"', '"Strasse"', '"PLZ"', '"Ort"', '"Telefon"', '"Telefax"', '"Homepage"', '"Email"', '"Position"', '"Anrede"', '"Titel"', '"Vorname"', '"NN_Praefix"', '"Nachname"', '"NN_Suffix"', '"Brief_Anr"', '"BriefTitel"', '"WZ2003_1"', '"Bezeichn_1"', '"WZ2003_2"', '"Bezeichn_2"', '"WZ2003_3"', '"Bezeichn3"', '"Ust_ID"', '"Amtsgerich"', '"Handelsreg"', '"HandelArt"', '"HandelDatu"', '"Ortsteil"', '"Ortszusatz"', '"Bundesland"', '"Vorwahl"', '"Leitbereic"', '"Einwohner"', '"Flaeche"', '"KFZ_KZ"', '"GeoXY"', '"Anz_Mitarb"', '"ID_KZ"', '"BranSuchBez"', '"Land"')
-	);
+	$saveset = array();
 	$stmnt = $db->prepare($sql);
 	$result = $stmnt->execute(array("$search1", "$search2", "$search3"));
-	
-	while ($fetch = $stmnt->fetch(PDO::FETCH_ASSOC)){
-		array_push($saveset, array_values($fetch));
-	}
+	$fetch = $stmnt->fetch(PDO::FETCH_ASSOC);
+
 	$file = "Export_$searchName.csv";
 	$path = "../export/";
 	$logpath = "../export/log/";
@@ -57,6 +52,14 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	$log = fopen($logpath.$logfn, 'w');
 	$enclosure = '"';
 	$delimiter = ';';
+	
+	if($fetch){
+		fputcsv($export, array_keys($fetch), $delimiter, $enclosure);
+		fwrite($log, print_r(array_keys($fetch), true));
+		while ($fetch){
+			array_push($saveset, array_values($fetch));
+		}
+	}
 	foreach ($saveset as $entry){
 		fputcsv($export, $entry, $delimiter, $enclosure);
 		fwrite($log, print_r($entry, true));
@@ -92,7 +95,7 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 			while ($getbund_fetch = $getbund_statement->fetch(PDO::FETCH_ASSOC)){
 				array_push($bundsave, array_values($getbund_fetch));
 			}
-			$file = "Export_".$searchName."_".$index.".csv";
+			$file = "Export_".$searchName."_".$index.".txt";
 			$path = "../exportbund/";
 			$logpath = "../exportbund/log/";
 			$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1."_".$index.".log";
