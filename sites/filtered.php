@@ -1,6 +1,6 @@
 <?php
-include 'Export.php';
-include 'config/config.php';
+include 'export.php';
+include '../config/config.php';
 $dbcon = new PDO("$driver:host=$hostname;port=$port;dbname=$dbname", "$dbuser", "$dbpassword");
 
 $sql = "

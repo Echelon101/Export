@@ -13,11 +13,14 @@ try {
  * Input for Field wz2003_3
  * </p>
  * @param string $searchName <p>
- * Name for Export File
+ * Name for export File
  * </p>
  * @return boolean
  */
 function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
+	try{
+	try{
+		echo 'call successful';
 	$db = new PDO('mysql:host=localhost;dbname=adressen', 'root', '');
 	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	/*
@@ -37,7 +40,9 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	WHERE wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?
 	';
 	
-	$saveset = array();
+	$saveset = array(
+			array('"ID"', '"Satznr"', '"Firmen_KZ"', '"Firma1"', '"Firma2"', '"Firma3"', '"Strasse"', '"PLZ"', '"Ort"', '"Telefon"', '"Telefax"', '"Homepage"', '"Email"', '"Position"', '"Anrede"', '"Titel"', '"Vorname"', '"NN_Praefix"', '"Nachname"', '"NN_Suffix"', '"Brief_Anr"', '"BriefTitel"', '"WZ2003_1"', '"Bezeichn_1"', '"WZ2003_2"', '"Bezeichn_2"', '"WZ2003_3"', '"Bezeichn3"', '"Ust_ID"', '"Amtsgerich"', '"Handelsreg"', '"HandelArt"', '"HandelDatu"', '"Ortsteil"', '"Ortszusatz"', '"Bundesland"', '"Vorwahl"', '"Leitbereic"', '"Einwohner"', '"Flaeche"', '"KFZ_KZ"', '"GeoXY"', '"Anz_Mitarb"', '"ID_KZ"', '"BranSuchBez"', '"Land"')
+	);
 	$stmnt = $db->prepare($sql);
 	$result = $stmnt->execute(array("$search1", "$search2", "$search3"));
 	
@@ -45,21 +50,28 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 		array_push($saveset, array_values($fetch));
 	}
 	$file = "Export_$searchName.csv";
-	$path = "export/";
-	$logpath = "export/log/";
+	$path = "../export/";
+	$logpath = "../export/log/";
 	$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1.".log";
 	$export = fopen($path.$file, 'w');
 	$log = fopen($logpath.$logfn, 'w');
-	
+	$enclosure = '"';
+	$delimiter = ';';
 	foreach ($saveset as $entry){
-		fputcsv($export, $entry);
-		//fwrite($log, print_r($entry, true));
+		fputcsv($export, $entry, $delimiter, $enclosure);
+		fwrite($log, print_r($entry, true));
 		}
 	return true;
+	}catch (PDOException $pdoE){
+		echo $pdoE->getMessage();
+	}
+	}catch (Exception $e){
+		echo $e->getMessage();
+	}
 }
 function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	try{
-	$dbcon = new PDO('mysql:host=localhost;dbname=adressen', 'root', '');
+	$dbcon = new PDO('mysql:host=localhost;dbname=adressen;charset=utf8', 'root', '');
 	$dbcon->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$bundsave = array();
 	$search1 = $search1."%";
@@ -81,8 +93,8 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 				array_push($bundsave, array_values($getbund_fetch));
 			}
 			$file = "Export_".$searchName."_".$index.".csv";
-			$path = "exportbund/";
-			$logpath = "exportbund/log/";
+			$path = "../exportbund/";
+			$logpath = "../exportbund/log/";
 			$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1."_".$index.".log";
 			$export = fopen($path.$file, 'w');
 			$log = fopen($logpath.$logfn, 'w');
