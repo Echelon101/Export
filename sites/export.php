@@ -32,41 +32,53 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 	/*
 	 * End Declaration Section
 	 */
+	$headers = '
+	SELECT * FROM adressen LIMIT 0,1;
+	';
 	
 	$sql = '
 	SELECT *
 	FROM adressen
 	WHERE wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?
 	';
-	
+	if(!isset($_SESSION['theaders'])){
+		$theaders_stmnt = $db->prepare($headers);
+		$theaders_result = $theaders_stmnt->execute();
+		$theaders = $theaders_stmnt->fetch(PDO::FETCH_ASSOC);
+		$_SESSION['theaders'] = array_keys($theaders);
+	}
 	$saveset = array();
 	$stmnt = $db->prepare($sql);
 	$result = $stmnt->execute(array("$search1", "$search2", "$search3"));
-	$fetch = $stmnt->fetch(PDO::FETCH_ASSOC);
-
-	$file = "Export_$searchName.csv";
+	
+	$file = "Export_$searchName.txt";
 	$path = "../export/";
 	$logpath = "../export/log/";
 	$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1.".log";
 	$export = fopen($path.$file, 'w');
-	$log = fopen($logpath.$logfn, 'w');
+	//$log = fopen($logpath.$logfn, 'w');
 	$enclosure = '"';
 	$delimiter = ';';
 	
-	if($fetch){
-		fputcsv($export, array_keys($fetch), $delimiter, $enclosure);
-		fwrite($log, print_r(array_keys($fetch), true));
-		while ($fetch){
-			array_push($saveset, array_values($fetch));
-		}
+	while ($fetch = $stmnt->fetch(PDO::FETCH_ASSOC)){
+		array_push($saveset, array_values($fetch));
 	}
+	fputcsv($export, $_SESSION['theaders'], $delimiter, $enclosure);
+	//fwrite($log, print_r($_SESSION['theaders'], true));
 	foreach ($saveset as $entry){
 		fputcsv($export, $entry, $delimiter, $enclosure);
-		fwrite($log, print_r($entry, true));
+		//fwrite($log, print_r($entry, true));
 		}
+		//$data = fread($export, filesize($path.$file));
+		fclose($export);
+		//fclose($log);
+		//$fname = $path.$file.'.gz';
+		//$zp = gzopen($fname, "w9");
+		//gzwrite($zp, $data);
+		//gzclose($zp);
 	return true;
 	}catch (PDOException $pdoE){
-		echo $pdoE->getMessage();
+		echo $pdoE->getMessage(); 
 	}
 	}catch (Exception $e){
 		echo $e->getMessage();

@@ -1,4 +1,5 @@
 <?php
+session_start();
 try{
 include 'export.php';
 include '../config/config.php';
