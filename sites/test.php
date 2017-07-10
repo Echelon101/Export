@@ -36,3 +36,6 @@ function clear_string($str, $how = '-'){
 	echo $str.'<br>';
 	return $str;
 }
+
+$ascii = chr(255) . chr(254);
+echo $ascii;
