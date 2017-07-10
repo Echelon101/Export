@@ -1,7 +1,7 @@
 <?php
 include 'export.php';
 include '../config/config.php';
-$dbcon = new PDO("$driver:host=$hostname;port=$port;dbname=$dbname", "$dbuser", "$dbpassword");
+$dbcon = new PDO("$driver:host=$hostname;port=$port;dbname=$dbname;charset=utf8mb4", "$dbuser", "$dbpassword");
 
 $sql = "
 SELECT * 
