@@ -1,5 +1,4 @@
 <?php
-try {
 //---------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -85,6 +84,7 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 		echo $e->getMessage();
 	}
 }
+
 function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	try{
 		$dbcon = new PDO('mysql:host=localhost;dbname=adressen;charset=utf8mb4', 'root', '');
@@ -146,11 +146,6 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	}catch (PDOException $pdoError){
 		echo $pdoError->getMessage();
 	}
-}
-} catch (PDOException $e) {
-	echo "Error: " . $e->getMessage() . "<br>";
-	return false;
-	die();
 }
 
 function clear_string($str, $how = '-'){
