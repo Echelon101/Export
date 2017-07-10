@@ -30,16 +30,16 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 			$search2 = $search2."%";
 			$search3 = $search3."%";
 			$searchNameN = clear_string($searchName);
-			
 			/*
 			 * End Declaration Section
 			 */
 			$headers = '
-			SELECT * FROM adressen LIMIT 0,1;
+			SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
+			FROM adressen LIMIT 0,1;
 			';
 			
 			$sql = '
-			SELECT *
+			SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
 			FROM adressen
 			WHERE wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?
 			';
@@ -64,7 +64,7 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 			while ($fetch = $stmnt->fetch(PDO::FETCH_ASSOC)){
 				array_push($saveset, array_values($fetch));
 			}
-			fputcsv($export, $_SESSION['theaders'], $delimiter, $enclosure);
+			fputcsv($export, array_values($_SESSION['theaders']), $delimiter, $enclosure);
 			//fwrite($log, print_r($_SESSION['theaders'], true));
 			foreach ($saveset as $entry){
 				fputcsv($export, $entry, $delimiter, $enclosure);
@@ -133,6 +133,7 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	return false;
 	die();
 }
+
 function clear_string($str, $how = '-'){
 	$search = array("ä", "ö", "ü", "ß", "Ä", "Ö",
 			"Ü", "&", "é", "á", "ó",
