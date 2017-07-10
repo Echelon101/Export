@@ -87,38 +87,57 @@ function QueryExport($search1, $search2, $search3, $searchName, $searchIndex){
 }
 function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	try{
-		$dbcon = new PDO('mysql:host=localhost;dbname=adressen;charset=utf8', 'root', '');
-		$dbcon->exec("set names utf8");
+		$dbcon = new PDO('mysql:host=localhost;dbname=adressen;charset=utf8mb4', 'root', '');
+		$dbcon->exec("set names utf8mb4");
 		$dbcon->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$bundsave = array();
 		$search1 = $search1."%";
 		$search2 = $search2."%";
 		$search3 = $search3."%";
 		$sql = '
-		SELECT *
+		SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
 		FROM adressen
 		WHERE Bundesland = ? AND (wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?)
 		';
-		$i=0;
+		$headers = '
+		SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
+		FROM adressen LIMIT 0,1;
+		';
+		
+		if(!isset($_SESSION['theaders'])){
+			$theaders_stmnt = $dbcon->prepare($headers);
+			$theaders_result = $theaders_stmnt->execute();
+			$theaders = $theaders_stmnt->fetch(PDO::FETCH_ASSOC);
+			$_SESSION['theaders'] = array_keys($theaders);
+		}  
+		
 		if (strlen($search1)<=3 && strlen($search2) <=3 && strlen($search3) <= 3){
 			$bund = array("Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern", "Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen");
-			$bund_short = array("Baden-Württemberg", "Thüringen");
-			foreach ($bund_short as $index){
+			//$bund_short = array("Baden-Württemberg", "Thüringen");
+			foreach ($bund as $index){
 				$getbund_statement = $dbcon->prepare($sql);
 				$getbund_result = $getbund_statement->execute(array("$index", "$search1", "$search2", "$search3"));
+				$bundsave = null;
+				$bundsave = array();
+				$searchNameN = clear_string($searchName);
+				$indexN = clear_string($index);
+				$file = "Export_".$searchNameN."_".$indexN.".txt";
+				$path = "../exportbund/";
+				$enclosure = '"';
+				$delimiter = ';';
+				//$logpath = "../exportbund/log/";
+				//$logfn = "log_Export_".$searchNameN."_".$searchIndex."_".$search1."_".$indexN.".log";
+				$export = fopen($path.$file, 'w');
+				//$log = fopen($logpath.$logfn, 'w');
+				fputcsv($export, array_values($_SESSION['theaders']), $delimiter, $enclosure);
 				while ($getbund_fetch = $getbund_statement->fetch(PDO::FETCH_ASSOC)){
 					array_push($bundsave, array_values($getbund_fetch));
 				}
-				$file = "Export_".$searchName."_".$index.".txt";
-				$path = "../exportbund/";
-				$logpath = "../exportbund/log/";
-				$logfn = "log_Export_".$searchName."_".$searchIndex."_".$search1."_".$index.".log";
-				$export = fopen($path.$file, 'w');
-				$log = fopen($logpath.$logfn, 'w');
 				foreach ($bundsave as $exportentry){
-					fputcsv($export, $exportentry);
+					fputcsv($export, $exportentry,  $delimiter, $enclosure);
 					//fwrite($log, print_r($exportentry, true));
 				}
+				fclose($export);
+				//fclose($log);
 			}
 			return true;
 		}else{
