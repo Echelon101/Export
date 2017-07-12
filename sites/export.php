@@ -147,6 +147,74 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 		echo $pdoError->getMessage();
 	}
 }
+function SubExportRcount (){
+	define("MinRowReq", 100000, true);
+	
+	$dbh = new PDO("mysql:host=localhost;dbname=adressen;charset=utf8mb4", "root", "");
+	
+	$get_baseInfo_statement = $dbh->prepare("SELECT * FROM rowcount");
+	$get_baseInfo_result = $get_baseInfo_statement->execute();
+	while ($get_baseInfo_dataset = $get_baseInfo_statement->fetch(PDO::FETCH_ASSOC)){
+		
+		$search1 = $get_baseInfo_dataset['wz2003']."%";
+		$search2 = $get_baseInfo_dataset['wz2003']."%";
+		$search3 = $get_baseInfo_dataset['wz2003']."%";
+		
+		$sql = '
+			SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
+			FROM adressen
+			WHERE Bundesland = ? AND (wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?)
+			';
+		$headers = '
+			SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
+			FROM adressen LIMIT 0,1;
+			';
+		$bund = array("Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern", "Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen");
+		
+		if(!isset($_SESSION['theaders'])){
+			$theaders_stmnt = $dbh->prepare($headers);
+			$theaders_result = $theaders_stmnt->execute(array("$index", "$search1", "$search2", "$search3"));
+			$theaders = $theaders_stmnt->fetch(PDO::FETCH_ASSOC);
+			$_SESSION['theaders'] = array_keys($theaders);
+		}
+
+		if($get_baseInfo_dataset['rowcount'] >= MinRowReq){
+			
+			foreach ($bund as $index){
+				
+				$export_data_statement = $dbh->prepare($sql);
+				$export_data_result = $export_data_statement->execute(array("$index", "$search1", "$search2", "$search3"));
+				
+				$searchNameN = clear_string($get_baseInfo_dataset['Name']);
+				$indexN = clear_string($index);
+				
+				$bundsave = null;
+				$bundsave = array();
+				
+				$file = "Export_".$searchNameN."_".$indexN.".txt";
+				$path = "../exportbund/";
+				$enclosure = '"';
+				$delimiter = ';';
+				//$logpath = "../exportbund/log/";
+				//$logfn = "log_Export_".$searchNameN."_".$searchIndex."_".$search1."_".$indexN.".log";
+				$export = fopen($path.$file, 'w');
+				//$log = fopen($logpath.$logfn, 'w');
+				fputcsv($export, array_values($_SESSION['theaders']), $delimiter, $enclosure);
+				
+				while($export_data_fetch = $export_data_statement->fetch(PDO::FETCH_ASSOC)){
+					array_push($bundsave, array_values($export_data_fetch));
+				}
+				
+				foreach ($bundsave as $exportentry){
+					fputcsv($export, $exportentry,  $delimiter, $enclosure);
+					//fwrite($log, print_r($exportentry, true));
+				}
+				fclose($export);
+				//fclose($log);
+			}
+		}
+	}
+}
 
 function clear_string($str, $how = '-'){
 	$search = array("ä", "ö", "ü", "ß", "Ä", "Ö",
