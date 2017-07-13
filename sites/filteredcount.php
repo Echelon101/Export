@@ -1,5 +1,5 @@
 <?php
-include 'count.php';
+include 'counter.php';
 include '../config/config.php';
 $dbcon = new PDO("$driver:host=$hostname;port=$port;dbname=$dbname;charset=utf8mb4", "$dbuser", "$dbpassword");
 
