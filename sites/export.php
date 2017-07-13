@@ -156,9 +156,9 @@ function SubExportRcount (){
 	$get_baseInfo_result = $get_baseInfo_statement->execute();
 	while ($get_baseInfo_dataset = $get_baseInfo_statement->fetch(PDO::FETCH_ASSOC)){
 		
-		$search1 = $get_baseInfo_dataset['wz2003']."%";
-		$search2 = $get_baseInfo_dataset['wz2003']."%";
-		$search3 = $get_baseInfo_dataset['wz2003']."%";
+		$search1 = $get_baseInfo_dataset['wz2003'];
+		$search2 = $get_baseInfo_dataset['wz2003'];
+		$search3 = $get_baseInfo_dataset['wz2003'];
 		
 		$sql = '
 			SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
@@ -168,6 +168,11 @@ function SubExportRcount (){
 		$headers = '
 			SELECT `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
 			FROM adressen LIMIT 0,1;
+			';
+		$count = '
+			SELECT COUNT(*) `Satznr`, `Firmen_KZ`, `Firma1`, `Firma2`, `Firma3`, `Strasse`, `PLZ`, `Ort`, `Telefon`, `Telefax`, `Homepage`, `Email`, `Position`, `Anrede`, `Titel`, `Vorname`, `NN_Praefix`, `Nachname`, `NN_Suffix`, `Brief_Anr`, `BriefTitel`, `WZ2003_1`, `Bezeichn_1`, `WZ2003_2`, `Bezeichn_2`, `WZ2003_3`, `Bezeichn3`, `Ust_ID`, `Amtsgerich`, `Handelsreg`, `HandelArt`, `HandelDatu`, `Ortsteil`, `Ortszusatz`, `Bundesland`, `Vorwahl`, `Leitbereic`, `Einwohner`, `Flaeche`, `KFZ_KZ`, `GeoXY`, `Anz_Mitarb`, `ID_KZ`, `BranSuchBez`, `Land`
+			FROM adressen
+			WHERE Bundesland = ? AND (wz2003_1 LIKE ? OR wz2003_2 LIKE ? OR wz2003_3 LIKE ?)
 			';
 		$bund = array("Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern", "Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen");
 		
@@ -184,6 +189,15 @@ function SubExportRcount (){
 				
 				$export_data_statement = $dbh->prepare($sql);
 				$export_data_result = $export_data_statement->execute(array("$index", "$search1", "$search2", "$search3"));
+				
+				$getbund_statement = $dbh->prepare($count);
+				$getbund_result = $getbund_statement->execute(array("$index", "$search1", "$search2", "$search3"));
+				
+				$getbund_rows = $getbund_statement->fetchColumn();
+				
+				$stmnt = $dbh->prepare("INSERT INTO rowcountbund (Name, Bundesland, wz2003, rowcount) VALUES (:Name, :Bundesland, :wz2003, :rowcount)");
+				$res = $stmnt->execute(array('Name' => $get_baseInfo_dataset['Name'], 'Bundesland' => $index, 'wz2003' => $search1, 'rowcount' => $getbund_rows));
+				
 				
 				$searchNameN = clear_string($get_baseInfo_dataset['Name']);
 				$indexN = clear_string($index);
