@@ -89,16 +89,7 @@ function CountSubExport($search1, $search2, $search3, $searchName, $searchIndex)
 				
 				$stmnt = $dbcon->prepare("INSERT INTO rowcountbund (Name, Bundesland, wz2003, rowcount) VALUES (:Name, :Bundesland, :wz2003, :rowcount)");
 				$res = $stmnt->execute(array('Name' => $searchName, 'Bundesland' => $index, 'wz2003' => $search1, 'rowcount' => $getbund_rows));
-				
-				$bundsave = null;
-				$bundsave=array();
-				while($getbund_rows = $getbund_statement->fetch(PDO::FETCH_ASSOC)){
-					array_push($bundsave, array_values($getbund_rows));
-				}
-				echo "<pre>";
-				print_r($bundsave);
-				echo "</pre>";
-				
+						
 			}
 			return true;
 		}else{
