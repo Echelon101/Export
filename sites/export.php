@@ -148,7 +148,7 @@ function SubExport($search1, $search2, $search3, $searchName, $searchIndex){
 	}
 }
 function SubExportRcount (){
-	define("MinRowReq", 100000, true);
+	define("MinRowReq", 25000, true);
 	
 	$dbh = new PDO("mysql:host=localhost;dbname=adressen;charset=utf8mb4", "root", "");
 	
