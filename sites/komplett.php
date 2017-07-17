@@ -17,7 +17,7 @@ session_start();
 			
 			$sql = "
 			SELECT * 
-			FROM branchen 
+			FROM branchen
 			WHERE BranchenID IS NOT NULL
 			";
 			
