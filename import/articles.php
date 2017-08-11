@@ -130,8 +130,9 @@ while($get_InfoSave = $get_Info->fetch(PDO::FETCH_ASSOC)){
 		default:
 			break;
 	}
+	$descriptionLong= "<h2>" . $get_InfoSave['Name'] ." kaufen</h2>
+	<p><br />Sie erhalten " . $get_InfoSave['rowcount'] . " Adressen der gew&auml;hlten Branche als kommagetrennte Textdatei. Diese k&ouml;nnen Sie in den allermeisten F&auml;llen problemlos in Ihre Anwendungsprogramme importieren und verwenden. Aus Platz- und Performancegr&uuml;nden erhalten Sie diese in gepackter Form (ZIP-Datei).<br /><br />Zur Neukundengewinnung ideal auch inkl. E-Mail-Adressen, sofern bekannt und angegeben.<br />Steigern Sie Ihren Umsatz durch unsere gepr&uuml;ften Branchenadressen.<br /><br /></p>";
 	$description = "Branche: " . $get_InfoSave['Name'] . ", Datensätze: " . $get_InfoSave['rowcount'];
-	$descriptionLong = "Branche: " . $get_InfoSave['Name'] . ", Datensätze: " . $get_InfoSave['rowcount'];
 	
 	$createArticle = $pdo->prepare("INSERT INTO articles (ordernumber, mainnumber, name, supplier, tax, price_EK, imageUrl, active, description, description_long, categories) VALUES (:ordernumber, :mainnumber, :name, :supplier, :tax, :price_EK, :imageUrl, :active, :description, :description_long, :categories)");
 	$createArticleResult = $createArticle->execute(
@@ -252,8 +253,9 @@ while($get_InfoSave = $get_Info->fetch(PDO::FETCH_ASSOC)){
 				echo $artNrF;
 				break;
 		}
+		$descriptionLongF= "<h2>" . $getFilterdArticleS['Name'] ." kaufen</h2>
+		<p><br />Sie erhalten " . $getFilterdArticleS['rowcount'] . " Adressen der gew&auml;hlten Branche als kommagetrennte Textdatei. Diese k&ouml;nnen Sie in den allermeisten F&auml;llen problemlos in Ihre Anwendungsprogramme importieren und verwenden. Aus Platz- und Performancegr&uuml;nden erhalten Sie diese in gepackter Form (ZIP-Datei).<br /><br />Zur Neukundengewinnung ideal auch inkl. E-Mail-Adressen, sofern bekannt und angegeben.<br />Steigern Sie Ihren Umsatz durch unsere gepr&uuml;ften Branchenadressen.<br /><br /></p>";
 		$descriptionF = "Branche: " . $getFilterdArticleS['Name'] . " " . $getFilterdArticleS['Bundesland'] . ", Datensätze: " . $getFilterdArticleS['rowcount'];
-		$descriptionLongF = "Branche: " . $getFilterdArticleS['Name'] . " " . $getFilterdArticleS['Bundesland'] . ", Datensätze: " . $getFilterdArticleS['rowcount'];
 		
 		$createFilterdArticle = $pdo->prepare("INSERT INTO articles (ordernumber, mainnumber, name, supplier, tax, price_EK, imageUrl, active, description, description_long, categories) VALUES (:ordernumber, :mainnumber, :name, :supplier, :tax, :price_EK, :imageUrl, :active, :description, :description_long, :categories)");
 		$createFilterdArticleResult = $createFilterdArticle->execute(
