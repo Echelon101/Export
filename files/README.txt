@@ -1,4 +1,20 @@
-Zuerst "categories.csv" Impotieren. Profil: "default_categories"
-Danach "articles.csv". Profil: "default_article_complete" (Beim Testen entstand immer der Fehler: Shop by ID 2 not found.) -> Behebon durch manipulation der Tabelle "s_core_shops".
+categories.csv
+	Beinhaltet alle Kategorien.
+	wird nach dem Profil "default_categories" importiert
+	!! Funktioniert nur wenn bisher keine kategorien angelegt wurden
+	
+articles.csv
+	Beinhaltet alle Artikel mit Bildern und Kategorien.
+	wird nach dem Profil "default_articles_complete" importiert
+	!braucht zwischen 1h - 3h um alles zu importieren
+	
+esd.php
+	Pfad: /export/import/esd.php
+	!!MUSS ANGEPASST WERDEN!!
+		Datenbank zugangsdaten in Zeile 5
+		Dateiendung Zeile 3
 
-Wenn alles Fertig ist bitte die ESD.sql auf dem server ausführen. Diese konvertiert alle angelegten artikel in ESD Artikel
+		
+Export Dateien
+	Pfad
+		/files/[ESD-KEY]/
