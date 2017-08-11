@@ -3,10 +3,10 @@ session_start();
 try{
 //Constants
 define("path", "../files/");
-define("Article_Prefix", "AD");
+define("Article_Prefix", "AS");
 define("tax", "19.00");
-define("supplier", "MaxxDiscount GmbH & Co. KG");
-define("ArtImage", "https://www.address-base.de/images/product_images/info_images/x10_4.jpg.pagespeed.ic._XWEulng58.jpg");
+define("supplier", "Portal Service GmbH & Co. KG");
+define("ArtImage", "http://www.addressscout24.de/media/image/9d/1a/8c/addressbox01_large.png");
 define("CatAlleBranchen", 6);
 
 $headers = 'SELECT * FROM articles LIMIT 0,1';
