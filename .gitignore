@@ -51,5 +51,6 @@ local.properties
 # Directories with lots of unnessicery Data
 exportbund/*
 export/*
+files/export/*
 log/*
 Export Visual/*
