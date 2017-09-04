@@ -25,18 +25,33 @@ foreach ($categories as $category){
 */
 
 $i = 5;
-
+$p = 5;
 $standardCategoreies = array('Alle Branchen', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K' , 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
 $rootCategories = array('Deutschland', 'Österreich', 'Schweiz');
 
 foreach ($rootCategories as $rootCategory){
 	$create_category_stmnt = $pdo->prepare("INSERT INTO newcategories (categoryId, parentID, description, active) VALUES (:categoryId, :parentID, :description, :active)");
 	$create_category_res = $create_category_stmnt->execute(array(
-			"categoryId" => $is,
-			"parentID" => $id,
-			"description" => $category,
+			"categoryId" => $i,
+			"parentID" => ROOT_PARENT,
+			"description" => $rootCategory,
 			"active" => true,
 			)
 		);
+	$i++;
+}
+foreach ($rootCategories as $rootCategory){
 	
+	foreach ($standardCategoreies as $standardCategory){
+		$create_subCat_stmnt = $pdo->prepare("INSERT INTO newcategories (categoryId, parentID, description, active) VALUES (:categoryId, :parentID, :description, :active)");
+		$create_subCat_res = $create_subCat_stmnt->execute(array(
+				"categoryId" => $i,
+				"parentID" => $p,
+				"description" => $standardCategory,
+				"active" => true,
+				)
+			);
+		$i++;
+	}
+	$p++;
 }

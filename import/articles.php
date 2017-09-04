@@ -134,7 +134,7 @@ while($get_InfoSave = $get_Info->fetch(PDO::FETCH_ASSOC)){
 	<p><br />Sie erhalten " . $get_InfoSave['rowcount'] . " Adressen der gew&auml;hlten Branche als kommagetrennte Textdatei. Diese k&ouml;nnen Sie in den allermeisten F&auml;llen problemlos in Ihre Anwendungsprogramme importieren und verwenden. Aus Platz- und Performancegr&uuml;nden erhalten Sie diese in gepackter Form (ZIP-Datei).<br /><br />Zur Neukundengewinnung ideal auch inkl. E-Mail-Adressen, sofern bekannt und angegeben.<br />Steigern Sie Ihren Umsatz durch unsere gepr&uuml;ften Branchenadressen.<br /><br /></p>";
 	$description = "Branche: " . $get_InfoSave['Name'] . ", Datensätze: " . $get_InfoSave['rowcount'];
 	
-	$createArticle = $pdo->prepare("INSERT INTO articles (ordernumber, mainnumber, name, supplier, tax, price_EK, imageUrl, active, description, description_long, categories) VALUES (:ordernumber, :mainnumber, :name, :supplier, :tax, :price_EK, :imageUrl, :active, :description, :description_long, :categories)");
+	$createArticle = $pdo->prepare("INSERT INTO articles (ordernumber, mainnumber, name, supplier, tax, price_EK, imageUrl, active, main, description, description_long, categories) VALUES (:ordernumber, :mainnumber, :name, :supplier, :tax, :price_EK, :imageUrl, :active, :main, :description, :description_long, :categories)");
 	$createArticleResult = $createArticle->execute(
 			array(
 					"ordernumber" => $artNr,
@@ -145,6 +145,7 @@ while($get_InfoSave = $get_Info->fetch(PDO::FETCH_ASSOC)){
 					"price_EK" => $ek,
 					"imageUrl" => ArtImage,
 					"active" => true,
+					"main" => true,
 					"description" => $description,
 					"description_long" => $descriptionLong,
 					"categories" => $category.$categorySpec

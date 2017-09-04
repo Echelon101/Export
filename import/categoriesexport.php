@@ -12,7 +12,7 @@ if(!isset($_SESSION['cheaders'])){
 }
 
 
-$exportS = $pdo->prepare("SELECT * FROM categories");
+$exportS = $pdo->prepare("SELECT * FROM newcategories");
 $exportR = $exportS->execute();
 
 $save = null;

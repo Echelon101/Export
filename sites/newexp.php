@@ -2,14 +2,17 @@
 try{
 	try {
 		session_start();
-		define("MinRowReq", 1000, true);
-		define("ARTICLE_PREFIX", "AS");
-		define("EXPORT_PATH", "../files/export/");
-		define("FILE_EXTENSION", ".txt");
-		define("CSV_DELIMITER", ";");
-		define("CSV_ENCLOSURE", '"');
-		define("CURRENT_COUNTRY", "Deutschland");
-		define("ARTICLE_NUMBER_OFFSET", 0);
+		
+		define("ARTICLE_PREFIX", "AS"); //Prefix der Artikelnummer
+		define("ARTICE_NUMBER_LEN", 6); //Länge der Artikenummer ohne Prefix
+		define("EXPORT_PATH", "../files/export/"); //Export Pfad
+		define("FILE_EXTENSION", ".txt"); //Dateiendung der Exportierten Datei
+		define("CSV_DELIMITER", ";"); //Feldtrennung in den Export Dateien
+		define("CSV_ENCLOSURE", '"'); //Texteinschluss in den Export Dateien
+		define("CURRENT_COUNTRY", "Deutschland"); //Land der Adressen
+		define("ARTICLE_NUMBER_OFFSET", 0); //Artikel Nummer Offset, um höhere Artikelnummern zu bekommen
+		define("MIN_ADDR_REQ", 10);  //Minimale Adressen pro Export
+		define("MIN_ROW_REQ", 1000); //Minimale Adressen, damit nach Bundesländern getrennt wird
 		
 		$pdo = new PDO("mysql:host=localhost;dbname=testshop;charset=utf8", "root" ,"");
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -72,27 +75,30 @@ try{
 			
 			$export_norm_stmnt = $pdo->prepare($sql);
 			$export_norm_res = $export_norm_stmnt->execute(array($s1."%" ,$s2."%" ,$s3."%"));
-			
-			while($export_norm_ftch = $export_norm_stmnt->fetch(PDO::FETCH_ASSOC)){
-				array_push($savesets, array_values($export_norm_ftch));
+			if($get_rowcount >= MIN_ADDR_REQ){
+				while($export_norm_ftch = $export_norm_stmnt->fetch(PDO::FETCH_ASSOC)){
+					array_push($savesets, array_values($export_norm_ftch));
+				}
+				$fname = ARTICLE_PREFIX . str_pad($count, ARTICE_NUMBER_LEN, "0", STR_PAD_LEFT);
+				
+				$export = fopen(EXPORT_PATH . $fname . FILE_EXTENSION, "w");
+				
+				fputcsv($export, array_values($_SESSION['headers']), CSV_DELIMITER, CSV_ENCLOSURE);
+				
+				foreach ($savesets as $saveset){
+					fputcsv($export, $saveset, CSV_DELIMITER, CSV_ENCLOSURE);
+				}
+				fclose($export);
+				
+				$put_articleInfo_stmnt = $pdo->prepare($putInfo);
+				$put_articleInfo_res = $put_articleInfo_stmnt->execute(array("ArticleNumber" => $fname, "Name" => $getCategories_ftch['Bezeichnung'], "Region" => null, "Country" => CURRENT_COUNTRY, "wz2003" => $s1, "rowcount" => $get_rowcount, "filename" => $fname . FILE_EXTENSION));
+							
+				$count++;
+			}else{
+				$log_dropped_stmnt = $pdo->prepare("INSERT INTO droppedexports (name, wz2003, rowcount) VALUES (:name, :wz2003, :rowcount)");
+				$log_dropped_res = $log_dropped_stmnt->execute(array("name" => $getCategories_ftch['Bezeichnung'], "wz2003" => $s1, "rowcount" => $get_rowcount));
 			}
-			$fname = ARTICLE_PREFIX . str_pad($count, 6, "0", STR_PAD_LEFT);
-			
-			$export = fopen(EXPORT_PATH . $fname . FILE_EXTENSION, "w");
-			
-			fputcsv($export, array_values($_SESSION['headers']), CSV_DELIMITER, CSV_ENCLOSURE);
-			
-			foreach ($savesets as $saveset){
-				fputcsv($export, $saveset, CSV_DELIMITER, CSV_ENCLOSURE);
-			}
-			fclose($export);
-			
-			$put_articleInfo_stmnt = $pdo->prepare($putInfo);
-			$put_articleInfo_res = $put_articleInfo_stmnt->execute(array("ArticleNumber" => $fname, "Name" => $getCategories_ftch['Bezeichnung'], "Region" => null, "Country" => CURRENT_COUNTRY, "wz2003" => $s1, "rowcount" => $get_rowcount, "filename" => $fname . FILE_EXTENSION));
-						
-			$count++;
-			
-			if($get_rowcount >= MinRowReq){
+			if($get_rowcount >= MIN_ROW_REQ){
 							
 				foreach ($bundeslander as $bundesland){
 					$bundsaves = null;
@@ -104,26 +110,30 @@ try{
 					
 					$export_bund_stmnt = $pdo->prepare($sql2);
 					$export_bund_res = $export_bund_stmnt->execute(array($bundesland, $s1, $s2, $s3));
-					
-					while($export_bund_ftch = $export_bund_stmnt->fetch(PDO::FETCH_ASSOC)){
-						array_push($bundsaves, array_values($export_bund_ftch));
+					if($get_rowcount_bund >= MIN_ADDR_REQ){
+						while($export_bund_ftch = $export_bund_stmnt->fetch(PDO::FETCH_ASSOC)){
+							array_push($bundsaves, array_values($export_bund_ftch));
+						}
+											
+						$fname_bund = ARTICLE_PREFIX . str_pad($count, ARTICE_NUMBER_LEN, "0", STR_PAD_LEFT);
+						
+						$export_bund = fopen(EXPORT_PATH . $fname_bund . FILE_EXTENSION, "w");
+						
+						fputcsv($export_bund, array_values($_SESSION['headers']), CSV_DELIMITER, CSV_ENCLOSURE);
+						
+						foreach ($bundsaves as $bundsave){
+							fputcsv($export_bund, $bundsave, CSV_DELIMITER, CSV_ENCLOSURE);
+						}
+						fclose($export_bund);
+						
+						$put_bundArticleInfo_stmnt = $pdo->prepare($putInfo);
+						$put_bundArticleInfo_res = $put_bundArticleInfo_stmnt->execute(array("ArticleNumber" => $fname_bund, "Name" => $getCategories_ftch['Bezeichnung'], "Region" => $bundesland, "Country" => CURRENT_COUNTRY, "wz2003" => $s1, "rowcount" => $get_rowcount_bund, "filename" => $fname_bund . FILE_EXTENSION));
+						
+						$count++;
+					}else {
+						$log_dropped_bund_stmnt = $pdo->prepare("INSERT INTO droppedexports (name, wz2003, rowcount, region) VALUES (:name, :wz2003, :rowcount, :region)");
+						$log_dropped_bund_res = $log_dropped_bund_stmnt->execute(array("name" => $getCategories_ftch['Bezeichnung'], "wz2003" => $s1, "rowcount" => $get_rowcount_bund, "region" => $bundesland));
 					}
-										
-					$fname_bund = ARTICLE_PREFIX . str_pad($count, 6, "0", STR_PAD_LEFT);
-					
-					$export_bund = fopen(EXPORT_PATH . $fname_bund . FILE_EXTENSION, "w");
-					
-					fputcsv($export_bund, array_values($_SESSION['headers']), CSV_DELIMITER, CSV_ENCLOSURE);
-					
-					foreach ($bundsaves as $bundsave){
-						fputcsv($export_bund, $bundsave, CSV_DELIMITER, CSV_ENCLOSURE);
-					}
-					fclose($export_bund);
-					
-					$put_bundArticleInfo_stmnt = $pdo->prepare($putInfo);
-					$put_bundArticleInfo_res = $put_bundArticleInfo_stmnt->execute(array("ArticleNumber" => $fname_bund, "Name" => $getCategories_ftch['Bezeichnung'], "Region" => $bundesland, "Country" => CURRENT_COUNTRY, "wz2003" => $s1, "rowcount" => $get_rowcount_bund, "filename" => $fname_bund . FILE_EXTENSION));
-					
-					$count++;
 				}
 				
 			}
